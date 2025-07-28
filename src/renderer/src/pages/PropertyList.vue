@@ -99,7 +99,13 @@
             >
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
-            <v-btn icon variant="text" color="error" @click="delete_property(item.id)">
+            <v-btn
+              icon
+              variant="text"
+              color="error"
+              :disabled="item.role !== 'ADMIN'"
+              @click="delete_property(item.id)"
+            >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </v-btn-group>

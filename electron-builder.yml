@@ -37,14 +37,5 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-publish:
-  provider: github
-  owner: TariqAli93
-  repo: alnakheel-desktop
-  releaseType: release
-  vPrefixedTagName: true
-  draft: false
-  prerelease: false
-  token: ${GITHUB_TOKEN}
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

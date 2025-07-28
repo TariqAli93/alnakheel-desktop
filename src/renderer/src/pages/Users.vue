@@ -21,7 +21,14 @@
           <v-divider />
           <v-card-actions>
             <v-btn color="primary" variant="text" @click="editUser(user)"> تعديل </v-btn>
-            <v-btn color="error" variant="text" @click="deleteUser(user.id)"> حذف </v-btn>
+            <v-btn
+              color="error"
+              variant="text"
+              :disabled="user.role !== 'ADMIN'"
+              @click="deleteUser(user.id)"
+            >
+              حذف
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
