@@ -5,7 +5,7 @@ import { ref } from 'vue'
 export const isLoading = ref(false) // متغير reactive يُستخدم في أي مكان
 
 const $axios = axios.create({
-  baseURL: 'http://187.33.150.194:3003',
+  baseURL: 'http://alnakhel.online:3003/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'

@@ -1,8 +1,5 @@
 <template>
   <v-container class="pa-4">
-    <v-overlay :model-value="loading" class="align-center justify-center" persistent>
-      <v-progress-circular size="64" indeterminate></v-progress-circular>
-    </v-overlay>
     <v-toolbar rounded="lg" class="mb-4">
       <v-toolbar-title>إضافة عقار</v-toolbar-title>
     </v-toolbar>
@@ -255,8 +252,6 @@ const formRef = ref(null)
 
 const toast = useToast()
 
-const loading = ref(false)
-
 const tabo = Object.keys(taboType).map((key) => key)
 const proprtiesType = computed(() => {
   return taboType[form.kind] || []
@@ -379,7 +374,6 @@ const rules = {
 
 const submitForm = async () => {
   const { valid } = await formRef.value.validate()
-  loading.value = true
 
   const modefiedForm = { ...form, elevator: form.elevator ? 1 : 0 }
 
@@ -387,7 +381,7 @@ const submitForm = async () => {
 
   if (!valid) {
     toast.error('يرجى ادخال جميع البيانات المطلوبة')
-    loading.value = false
+
     return
   }
 
@@ -396,20 +390,12 @@ const submitForm = async () => {
 
     if (res.data.success) {
       toast.success('تم اضافة العقار بنجاح')
-
-      setTimeout(() => {
-        loading.value = false
-      }, 1000)
     } else {
       toast.error('حدث خطأ أثناء إضافة العقار')
     }
   } catch (error) {
     toast.error('حدث خطأ أثناء إضافة العقار')
     console.error(error)
-  } finally {
-    setTimeout(() => {
-      loading.value = false
-    }, 1000)
   }
 }
 </script>
