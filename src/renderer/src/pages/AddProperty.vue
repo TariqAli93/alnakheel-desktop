@@ -366,13 +366,6 @@ const dynamicFields = [
         return 6
       }
     }
-  },
-  {
-    model: 'shops',
-    label: 'عدد المحلات التجارية',
-    variant: 'outlined',
-    if: (form) => form.type.includes('بناية'),
-    md: (form) => (form.type.includes('بناية') ? 6 : 4)
   }
 ]
 
