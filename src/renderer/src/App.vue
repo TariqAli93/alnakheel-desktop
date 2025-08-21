@@ -20,6 +20,10 @@ import { isLoading } from './plugins/vueAxios'
 
 const loginStore = useLoginState()
 const isLoggedIn = computed(() => loginStore.isLoggedIn ?? false)
+
+if (!loginStore.checkTokenValidity()) {
+  loginStore.logout()
+}
 </script>
 
 <style>

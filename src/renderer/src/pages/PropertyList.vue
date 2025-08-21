@@ -1,193 +1,188 @@
 <template>
-  <v-container fluid class="py-10 px-4 md:px-10 min-h-screen">
-    <v-card class="pa-3 mb-5">
-      <v-row>
-        <v-col cols="12" md="12" lg="12">
-          <v-card class="w-full d-block" elevation="0">
-            <!-- العنوان والزر -->
-            <div class="d-flex items-center justify-between pa-4">
-              <h1 class="text-3xl font-bold d-flex align-center justify-center">
-                <v-icon size="24" class="ml-2">mdi-home</v-icon>
-                الفرز و البحث عن العقارات
-              </h1>
-            </div>
+  <v-card class="pa-6 rounded-lg">
+    <v-card-subtitle class="pa-3">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">البحث و الفرز</h1>
+          <p class="text-lg">معلومات شاملة عن العقار المحدد</p>
+        </div>
+      </div>
+    </v-card-subtitle>
 
-            <v-divider />
+    <v-divider class="my-4" />
+    <v-text-field
+      v-model="search"
+      variant="solo-filled"
+      label="ابحث عن اسم، نوع أو محافظة"
+      prepend-inner-icon="mdi-magnify"
+      hide-details
+      class="mt-3"
+      clearable
+    />
 
-            <v-text-field
-              v-model="search"
-              variant="solo-filled"
-              label="ابحث عن اسم، نوع أو محافظة"
-              prepend-inner-icon="mdi-magnify"
-              hide-details
-              class="mt-3"
-              clearable
-            />
-          </v-card>
-        </v-col>
+    <v-row class="mt-3">
+      <v-col cols="12" lg="6">
+        <v-select
+          v-model="selectedTaboType"
+          :items="tabo"
+          label="جنس العقار"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+          @update:model-value="onChangeTaboType"
+        />
+      </v-col>
 
-        <v-divider />
+      <v-col cols="12" lg="6">
+        <v-select
+          v-model="selectedProprtiesType"
+          :items="proprtiesType"
+          label="نوع العقار"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+    </v-row>
+  </v-card>
 
-        <v-col cols="12" md="12" lg="12" class="flex justify-center items-center flex-column">
-          <v-card class="w-full bg-transparent" elevation="0">
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="selectedTaboType"
-                  :items="tabo"
-                  label="جنس العقار"
-                  variant="solo-filled"
-                  hide-details
-                  class="mb-2"
-                  prepend-inner-icon="mdi-filter"
-                  clearable
-                  @update:model-value="onChangeTaboType"
-                />
-              </v-col>
+  <v-card class="pa-6 rounded-lg mt-3">
+    <v-card-subtitle class="pa-3">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-4xl font-bold mb-2">قائمة العقارات</h1>
+          <p class="text-lg">معلومات شاملة عن العقارات المحفوظة</p>
+        </div>
 
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="selectedProprtiesType"
-                  :items="proprtiesType"
-                  label="نوع العقار"
-                  variant="solo-filled"
-                  hide-details
-                  class="mb-2"
-                  prepend-inner-icon="mdi-filter"
-                  clearable
-                />
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-card>
+        <div>
+          <v-btn icon variant="text" @click="exportProperties">
+            <Download />
+          </v-btn>
+        </div>
+      </div>
+    </v-card-subtitle>
 
-    <v-card elevation="3">
-      <v-card-title class="py-4">
-        <v-toolbar rounded>
-          <v-toolbar-title> قائمة العقارات </v-toolbar-title>
-        </v-toolbar>
-      </v-card-title>
-
-      <v-data-table
-        :headers="headers"
-        :items="filteredProperties"
-        class="elevation-1 bordered-table"
-        item-value="id"
-        items-per-page-text="عدد العقارات في الصفحة"
-        bordered="1"
-        no-data-text="لا توجد بيانات"
-        :search="search"
-      >
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.actions="{ item }">
-          <v-btn-group class="d-flex justify-center bg-background opacity-60" density="comfortable">
-            <v-btn
-              icon
-              variant="text"
-              color="primary"
-              @click="$router.push(`/property-details/${item.id}`)"
-            >
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
-            <v-btn
-              icon
-              variant="text"
-              color="secondary"
-              @click="$router.push(`/update-property/${item.id}`)"
-            >
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn
-              icon
-              variant="text"
-              color="error"
-              :disabled="item.role !== 'ADMIN'"
-              @click="delete_property(item.id)"
-            >
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </v-btn-group>
-        </template>
-
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.alley="{ item }">
-          <span>{{ item.alley === null || item.alley === '' ? 'غير محدد' : item.alley }}</span>
-        </template>
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.block="{ item }">
-          <span>{{ item.block === null || item.block === '' ? 'غير محدد' : item.block }}</span>
-        </template>
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.floors="{ item }">
-          <span>{{ item.floors === null || item.floors === '' ? 'غير محدد' : item.floors }}</span>
-        </template>
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.shops="{ item }">
-          <span>{{ item.shops === null || item.shops === '' ? 'غير محدد' : item.shops }}</span>
-        </template>
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.elevator="{ item }">
-          <v-icon :color="item.elevator === 'yes' ? 'green' : 'red'" class="ma-1">
-            {{ item.elevator === 'yes' ? 'mdi-check' : 'mdi-close' }}
-          </v-icon>
-        </template>
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.status="{ item }">
-          <v-chip
-            :color="
-              item.status === 'available'
-                ? 'green'
-                : item.status === 'sold'
-                  ? 'red'
-                  : item.status === 'reserved'
-                    ? 'yellow'
-                    : item.status === 'underConstruction'
-                      ? 'orange'
-                      : 'grey'
-            "
-            class="ma-1"
+    <v-data-table
+      :headers="headers"
+      :items="filteredProperties"
+      class="elevation-0 bordered-table"
+      item-value="id"
+      items-per-page-text="عدد العقارات في الصفحة"
+      bordered="1"
+      no-data-text="لا توجد بيانات"
+      :search="search"
+    >
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.actions="{ item }">
+        <v-btn-group class="d-flex justify-center bg-background opacity-60" density="comfortable">
+          <v-btn
+            icon
+            variant="text"
+            color="primary"
+            @click="$router.push(`/property-details/${item.id}`)"
           >
-            {{ propertyStatus[item.status] }}
-          </v-chip>
-        </template>
-
-        <!-- description -->
-
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.description="{ item }">
-          <!-- sub string  -->
-          <span
-            v-if="item.description && item.description.length > 25"
-            style="min-width: 200px !important; display: block"
+            <v-icon>mdi-eye</v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            variant="text"
+            color="secondary"
+            @click="$router.push(`/update-property/${item.id}`)"
           >
-            {{ item.description.substring(0, 25) }}...
-          </span>
-          <span
-            v-else-if="item.description && item.description.length <= 25"
-            style="min-width: 200px !important; display: block"
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+          <v-btn
+            icon
+            variant="text"
+            color="error"
+            :disabled="loginState.user.role !== 'ADMIN'"
+            @click="delete_property(item.id)"
           >
-            {{ item.description }}
-          </span>
-        </template>
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </v-btn-group>
+      </template>
 
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.name="{ item }">
-          <span style="min-width: 200px !important; display: block">
-            {{ item.name }}
-          </span>
-        </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.alley="{ item }">
+        <span>{{ item.alley === null || item.alley === '' ? 'غير محدد' : item.alley }}</span>
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.block="{ item }">
+        <span>{{ item.block === null || item.block === '' ? 'غير محدد' : item.block }}</span>
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.floors="{ item }">
+        <span>{{ item.floors === null || item.floors === '' ? 'غير محدد' : item.floors }}</span>
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.shops="{ item }">
+        <span>{{ item.shops === null || item.shops === '' ? 'غير محدد' : item.shops }}</span>
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.elevator="{ item }">
+        <v-icon :color="item.elevator === 'yes' ? 'green' : 'red'" class="ma-1">
+          {{ item.elevator === 'yes' ? 'mdi-check' : 'mdi-close' }}
+        </v-icon>
+      </template>
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.status="{ item }">
+        <v-chip
+          :color="
+            item.status === 'available'
+              ? 'green'
+              : item.status === 'sold'
+                ? 'red'
+                : item.status === 'reserved'
+                  ? 'yellow'
+                  : item.status === 'underConstruction'
+                    ? 'orange'
+                    : 'grey'
+          "
+          class="ma-1"
+        >
+          {{ propertyStatus[item.status] }}
+        </v-chip>
+      </template>
 
-        <!-- eslint-disable-next-line vue/valid-v-slot -->
-        <template #item.phone="{ item }">
-          <span style="min-width: 200px !important; display: block">
-            {{ item.phone }}
-          </span>
-        </template>
-      </v-data-table>
-    </v-card>
-  </v-container>
+      <!-- description -->
+
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.description="{ item }">
+        <!-- sub string  -->
+        <span
+          v-if="item.description && item.description.length > 25"
+          style="min-width: 200px !important; display: block"
+        >
+          {{ item.description.substring(0, 25) }}...
+        </span>
+        <span
+          v-else-if="item.description && item.description.length <= 25"
+          style="min-width: 200px !important; display: block"
+        >
+          {{ item.description }}
+        </span>
+      </template>
+
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.name="{ item }">
+        <span style="min-width: 200px !important; display: block">
+          {{ item.name }}
+        </span>
+      </template>
+
+      <!-- eslint-disable-next-line vue/valid-v-slot -->
+      <template #item.phone="{ item }">
+        <span style="min-width: 200px !important; display: block">
+          {{ item.phone }}
+        </span>
+      </template>
+    </v-data-table>
+  </v-card>
 </template>
 
 <script setup>
@@ -195,8 +190,12 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import taboType from '../plugins/taboType'
 import { propertyService } from '../services/api'
 import { useToast } from 'vue-toastification'
+import { useLoginState } from '../stores/login'
+import { Download } from 'lucide-vue-next'
 
 const toast = useToast()
+
+const loginState = useLoginState()
 
 const properties = ref([])
 const search = ref('')
@@ -245,6 +244,7 @@ const get_proprties = async () => {
     const res = await propertyService.getAll()
     console.log(res)
     properties.value = res.data.data // Assuming res is an array of properties
+    console.log(res)
   } catch (error) {
     console.log(error)
     toast.error('خطأ في جلب البيانات', 'تعذر جلب البيانات من الخادم')
@@ -276,6 +276,19 @@ const filteredProperties = computed(() => {
   })
 })
 
+const exportProperties = async () => {
+  try {
+    const res = await propertyService.exportPropertiesToExcel(filteredProperties.value)
+    const buffer = res.data // ✅ هذا Buffer/ArrayBuffer
+    const defaultName = `properties-${new Date().toISOString().slice(0, 10)}.xlsx`
+    await window.api.saveExcel({ defaultName, buffer })
+    toast.success('تم تصدير العقارات بنجاح', 'تم تصدير العقارات إلى Excel')
+  } catch (error) {
+    console.log(error)
+    toast.error('خطأ في تصدير العقارات', 'تعذر تصدير العقارات إلى Excel')
+  }
+}
+
 // model variables
 let selectedTaboType = ref(null)
 let selectedProprtiesType = ref(null)
@@ -289,25 +302,4 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-:deep(.bordered-table.v-theme--light) {
-  --v-border-color: #15151533 !important;
-}
-
-:deep(.bordered-table.v-theme--dark) {
-  --v-border-color: rgba(128, 128, 128, 0.4);
-}
-
-:deep(.bordered-table thead tr th),
-:deep(.bordered-table tbody tr td) {
-  border-top: 1px solid var(--v-border-color) !important;
-  border-bottom: 1px solid var(--v-border-color) !important;
-  border-right: 1px solid var(--v-border-color) !important; /* الخط العامودي */
-  white-space: nowrap;
-}
-
-:deep(.bordered-table thead tr th:first-child),
-:deep(.bordered-table tbody tr td:first-child) {
-  border-right: none !important;
-}
-</style>
+<style lang="scss" scoped></style>

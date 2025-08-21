@@ -4,17 +4,30 @@ const propertyService = {
   update: (id, data) => $axios.put(`/api/properties/${id}`, data),
   delete: (id) => $axios.delete(`/api/properties/${id}`),
   getAll: () => $axios.get('/api/properties'),
-  getById: (id) => $axios.get(`/api/properties/${id}`)
+  getById: (id) => $axios.get(`/api/properties/${id}`),
+  createPropertyImage: (data) => $axios.post(`/api/propertyimages`, data),
+  deletePropertyImage: (id, propertyId) =>
+    $axios.delete(`/api/propertyimages?imageId=${id}&propertyId=${propertyId}`),
+  createPropertyVideo: (data) => $axios.post(`/api/propertyvideos`, data),
+  deletePropertyVideo: (id) => $axios.delete(`/api/propertyvideos/${id}`),
+  exportPropertiesToExcel: (data = {}) =>
+    $axios.post(`/api/export/properties`, data, {
+      responseType: 'arraybuffer'
+    })
 }
 
 const userService = {
-  login: (data) => $axios.post('/api/users/login', data),
+  login: (data) => $axios.post('/auth/users/login', data),
   logout: () => $axios.post('/api/users/logout'),
   getUserById: (id) => $axios.get(`/api/users/${id}`),
   getUsers: () => $axios.get('/api/users'),
   createUser: (data) => $axios.post('/api/users/register', data),
   updateUser: (id, data) => $axios.put(`/api/users/${id}`, data),
-  deleteUser: (id) => $axios.delete(`/api/users/${id}`)
+  deleteUser: (id) => $axios.delete(`/api/users/${id}`),
+  deleteUserPermanently: (id) => $axios.delete(`/api/users/permanently/${id}`),
+  restoreUser: (id) => $axios.put(`/api/user/restore/${id}`),
+  activeUser: (id) => $axios.put(`/api/users/active/${id}`),
+  disactiveUser: (id) => $axios.put(`/api/users/disactive/${id}`)
   // Add more user-related methods as needed
 }
 

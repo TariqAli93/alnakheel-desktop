@@ -1,13 +1,5 @@
 <template>
   <div class="min-h-screen">
-    <v-overlay :is-loading="isLoading">
-      <v-progress-circular
-        indeterminate
-        color="primary"
-        size="64"
-        class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-      />
-    </v-overlay>
     <!-- Header -->
     <div class="mb-8 mt-5">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -130,7 +122,7 @@
     </v-card>
 
     <!-- Properties Table -->
-    <v-card class="pa-4 mb-8">
+    <!-- <v-card class="pa-4 mb-8">
       <v-data-table
         :items="properties"
         :items-per-page="10"
@@ -149,7 +141,7 @@
           </v-container>
         </template>
       </v-data-table>
-    </v-card>
+    </v-card> -->
   </div>
 </template>
 
@@ -166,7 +158,6 @@ import {
 } from 'lucide-vue-next'
 import PieChart from '../components/PieChart.vue'
 import BarChart from '../components/BarChart.vue'
-import { isLoading } from '../plugins/vueAxios'
 import { propertyService } from '../services/api'
 
 const properties = ref([])
@@ -195,16 +186,6 @@ const fetchProperties = async () => {
     console.error('Error fetching properties:', error)
   }
 }
-
-const headers = [
-  { text: 'الاسم', value: 'name' },
-  { text: 'الحالة', value: 'status' },
-  { text: 'المحافظة', value: 'province' },
-  { text: 'السعر', value: 'price' },
-  { text: 'النوع', value: 'type' },
-  { text: 'المساحة (م²)', value: 'area' },
-  { text: 'غرف النوم', value: 'bedrooms' }
-]
 
 const animatedStats = reactive({
   total: 0,

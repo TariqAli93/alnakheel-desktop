@@ -2,6 +2,8 @@ appId: com.electron.app
 productName: النخيل
 directories:
   buildResources: build
+icon: build/icon.png # أو icon.ico للويندوز
+
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -12,6 +14,7 @@ asarUnpack:
   - resources/**
 win:
   executableName: النخيل
+  icon: build/icon.ico
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

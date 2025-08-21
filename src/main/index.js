@@ -1,8 +1,9 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron'
 import icon from '../../resources/icon.png?asset'
+import fs from 'node:fs/promises'
 
 function createWindow() {
   // Create the browser window.
@@ -25,6 +26,14 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
+  })
+
+  // add shortcut to open dev tools
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.key === 'F12' && is.dev) {
+      event.preventDefault()
+      mainWindow.webContents.openDevTools()
+    }
   })
 
   // HMR for renderer base on electron-vite cli.
@@ -83,6 +92,18 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
   }
+})
+
+ipcMain.handle('save-excel', async (_event, { defaultName, buffer }) => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: 'احفظ ملف Excel',
+    defaultPath: defaultName,
+    filters: [{ name: 'Excel Workbook', extensions: ['xlsx'] }]
+  })
+
+  if (canceled || !filePath) return null
+  await fs.writeFile(filePath, Buffer.from(buffer))
+  return filePath
 })
 
 // In this file you can include the rest of your app's specific main process

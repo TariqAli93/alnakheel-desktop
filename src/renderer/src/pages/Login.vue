@@ -39,10 +39,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLoginState } from '../stores/login'
-import $axios from '../plugins/vueAxios'
+import { userService } from '../services/api'
+import { useToast } from 'vue-toastification'
 
 const router = useRouter()
 const loginStore = useLoginState()
+
+const toast = useToast()
 
 const username = ref('')
 const password = ref('')
@@ -56,22 +59,32 @@ const passwordRules = [(v) => !!v || 'Password is required']
 const login = async () => {
   if (form.value.validate()) {
     try {
-      const response = await $axios.post('/api/users/login', {
+      const response = await userService.login({
         username: username.value,
         password: password.value
       })
+
+      console.log(response.data)
 
       if (response.data.success) {
         const userData = loginStore.decodeToken(response.data.token)
 
         loginStore.login(response.data.token, userData)
 
+        toast.success('تم تسجيل الدخول بنجاح')
+
         router.push({ name: 'Home' })
       } else {
         console.error('Login failed:', response.data.message)
+        toast.error(response.data.message)
       }
     } catch (error) {
-      console.error('Login failed:', error)
+      console.error('Login failed:', error.response.data.message)
+      toast.error(error.response.data.message)
+
+      if (error.response.data.message === 'User is deleted') {
+        toast.error('المستخدم غير موجود')
+      }
 
       return
     }

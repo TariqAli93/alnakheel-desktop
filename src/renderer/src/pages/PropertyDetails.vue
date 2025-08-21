@@ -8,6 +8,10 @@
             <h1 class="text-4xl font-bold mb-2">تفاصيل العقار</h1>
             <p class="text-lg">معلومات شاملة عن العقار المحدد</p>
           </div>
+
+          <v-btn icon variant="text" @click="$router.back()">
+            <ArrowLeft />
+          </v-btn>
         </div>
       </v-card-subtitle>
 
@@ -194,20 +198,157 @@
             </div>
           </v-card>
 
-          <!-- Quick Stats -->
-          <!-- <div class="bg-white rounded-lg shadow-xl border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold mb-4">إحصائيات سريعة</h3>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <div class="text-2xl font-bold text-blue-600">{{ property.area || '—' }}</div>
-                <div class="text-xs">المساحة (م²)</div>
-              </div>
-              <div class="text-center p-3 bg-green-50 rounded-lg">
-                <div class="text-2xl font-bold text-green-600">{{ property.id || '—' }}</div>
-                <div class="text-xs">رقم العقار</div>
-              </div>
+          <!-- add media -->
+          <v-card class="bg-background opacity-60 mb-5 rounded-lg">
+            <div
+              class="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 text-white flex items-center justify-between"
+            >
+              <h3 class="text-xl font-bold">الوسائط</h3>
+              <v-spacer />
+              <v-btn
+                icon
+                variant="plain"
+                color="white"
+                class="text-white opacity-100"
+                @click="propertyImagesDialog = true"
+              >
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
             </div>
-          </div> -->
+            <div
+              v-if="property.PropertyImages && property.PropertyImages.length === 0"
+              class="pa-6"
+            >
+              <p class="text-sm">لا توجد وسائط متاحة لهذا العقار.</p>
+            </div>
+
+            <GalleryCarousel :images="propertyImages" />
+            <v-dialog v-model="propertyImagesDialog" max-width="500px">
+              <v-card>
+                <v-card-title class="flex items-center justify-between">
+                  <span class="text-[13px]">إضافة صورة جديدة</span>
+                  <v-spacer />
+                  <v-btn variant="flat" density="compact" icon @click="closePropertyImagesDialog">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-card-title>
+                <v-divider />
+                <div class="p-4">
+                  <v-file-input
+                    v-model="newImage"
+                    label="اختر صورة"
+                    accept="image/*"
+                    variant="outlined"
+                    append-icon=""
+                    density="compact"
+                    append-inner-icon=""
+                    hide-details
+                    prepend-icon=""
+                    @change="onImageChange"
+                  />
+
+                  <v-divider class="my-4" />
+                  <v-btn
+                    :disabled="!newImage"
+                    color="primary"
+                    density="default"
+                    block
+                    @click="uploadImage"
+                  >
+                    رفع الصورة
+                  </v-btn>
+                </div>
+              </v-card>
+            </v-dialog>
+          </v-card>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Property Details Card -->
+        <div class="lg:col-span-2">
+          <v-card class="bg-background opacity-60 mt-5 rounded-lg">
+            <div
+              class="bg-gradient-to-r from-yellow-500 to-amber-800 px-6 py-4 text-white flex items-center justify-between"
+            >
+              <h3 class="text-xl font-bold">مقاطع الفيديو</h3>
+              <v-spacer />
+              <v-btn
+                icon
+                variant="plain"
+                color="white"
+                class="text-white opacity-100"
+                @click="propertyVideosDialog = true"
+              >
+                <v-icon>mdi-plus</v-icon>
+              </v-btn>
+            </div>
+
+            <div
+              v-if="property.PropertyVideos && property.PropertyVideos.length === 0"
+              class="pa-6"
+            >
+              <p class="text-sm">لا توجد مقاطع فيديو متاحة لهذا العقار.</p>
+            </div>
+
+            <div
+              v-if="propertyVideos.length > 0"
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pa-3"
+            >
+              <SmartVideo
+                v-for="v in propertyVideos"
+                :key="v.id"
+                :video="v"
+                :open-in-lightbox="true"
+                @open-lightbox="openVideoInLightbox"
+              />
+            </div>
+
+            <!-- اللايت بوكس -->
+            <VideoLightbox ref="videoLb" />
+
+            <v-dialog v-model="propertyVideosDialog" max-width="500px">
+              <v-card>
+                <v-card-title class="flex items-center justify-between">
+                  <span class="text-[13px]">إضافة فيديو جديد</span>
+                  <v-spacer />
+                  <v-btn variant="flat" density="compact" icon @click="closePropertyVideosDialog">
+                    <v-icon>mdi-close</v-icon>
+                  </v-btn>
+                </v-card-title>
+                <v-divider />
+                <div class="p-4">
+                  <v-text-field
+                    v-model="newVideoUrl"
+                    label="رابط الفيديو"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+
+                  <v-divider class="my-4" />
+                  <v-select
+                    v-model="videoPlatform"
+                    :items="videoPlatforms"
+                    label="منصة الفيديو"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                  />
+                  <v-divider class="my-4" />
+                  <v-btn
+                    :disabled="!newVideoUrl"
+                    color="primary"
+                    density="default"
+                    block
+                    @click="addVideo"
+                  >
+                    اضافة الفيديو
+                  </v-btn>
+                </div>
+              </v-card>
+            </v-dialog>
+          </v-card>
         </div>
       </div>
     </div>
@@ -218,9 +359,32 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
 import { propertyService } from '../services/api'
+import $axios from '../plugins/vueAxios'
+import GalleryCarousel from '../components/GalleryCarousel.vue'
+import { emitter } from '../plugins/event-bus'
+import SmartVideo from '../components/SmartVideo.vue'
+import VideoLightbox from '../components/VideoLightbox.vue'
+import { ArrowLeft } from 'lucide-vue-next'
 
 const route = useRoute()
 const property = ref({})
+
+const propertyImages = ref([])
+const propertyVideos = ref([])
+const videoLb = ref()
+
+const propertyImagesDialog = ref(false)
+const propertyVideosDialog = ref(false)
+
+const newVideoUrl = ref('')
+const videoPlatform = ref(null)
+const videoPlatforms = ref([
+  { value: 'YOUTUBE', title: 'يوتيوب' },
+  { value: 'VIMEO', title: 'فيميو' },
+  { value: 'DAILYMOTION', title: 'ديلي موشن' }
+])
+
+const newImage = ref(null)
 
 const propertyStatus = reactive({
   available: 'متاح',
@@ -274,66 +438,101 @@ function formatPrice(price) {
   }).format(price)
 }
 
-onMounted(async () => {
+function onImageChange(event) {
+  const file = event.target.files[0]
+  if (file) {
+    newImage.value = file
+  }
+
+  console.log('📸 تم اختيار صورة جديدة:', newImage.value)
+}
+
+const closePropertyImagesDialog = () => {
+  propertyImagesDialog.value = false
+  newImage.value = null
+}
+
+const closePropertyVideosDialog = () => {
+  propertyVideosDialog.value = false
+  newVideoUrl.value = ''
+  videoPlatform.value = null
+}
+
+function openVideoInLightbox(url) {
+  videoLb.value?.open(url)
+}
+
+const uploadImage = async () => {
+  if (!newImage.value) return
+
+  console.log(newImage.value)
+
+  const formData = new FormData()
+  formData.append('image', newImage.value)
+  formData.append('propertyId', property.value.id)
+
+  try {
+    await propertyService.createPropertyImage(formData)
+
+    propertyImagesDialog.value = false
+    await fetchPropertyDetails() // Refresh property details to include new image
+    newImage.value = null
+  } catch (error) {
+    console.error('❌ فشل في رفع الصورة:', error)
+  }
+}
+
+const addVideo = async () => {
+  if (!newVideoUrl.value || !videoPlatform.value) return
+
+  const videoData = {
+    url: newVideoUrl.value,
+    platform: videoPlatform.value,
+    propertyId: property.value.id
+  }
+
+  try {
+    await propertyService.createPropertyVideo(videoData)
+    propertyVideosDialog.value = false
+    newVideoUrl.value = ''
+    videoPlatform.value = null
+    fetchPropertyDetails()
+  } catch (error) {
+    console.error('❌ فشل في إضافة الفيديو:', error)
+  }
+}
+
+emitter.on('delete', async (videoId) => {
+  await propertyService.deletePropertyVideo(parseInt(videoId, 10))
+  await fetchPropertyDetails()
+})
+
+const fetchPropertyDetails = async () => {
   const id = route.params.id
   try {
     const res = await propertyService.getById(id)
-    console.log('✅ تم تحميل بيانات العقار:', res)
     property.value = res.data.data
+    propertyImages.value = res.data.data.PropertyImages.map((image) => image) || []
+
+    propertyImages.value = propertyImages.value.map((image) => {
+      return {
+        id: image.id,
+        imageId: image.image.id,
+        propertyId: image.propertyId,
+        url: `${$axios.defaults.baseURL}public/images/${image.image.filename}`
+      }
+    })
+
+    propertyVideos.value = res.data.data.PropertyVideos.map((video) => video) || []
+
+    console.log('📄 تم تحميل تفاصيل العقار:', property.value)
   } catch (error) {
     console.error('❌ فشل في تحميل بيانات العقار:', error)
   }
+}
+
+onMounted(async () => {
+  await fetchPropertyDetails()
+  emitter.on('image-deleted', fetchPropertyDetails)
 })
 </script>
-
-<style scoped>
-/* Custom RTL support and additional styling */
-.rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
-  --tw-space-x-reverse: 1;
-}
-
-/* Smooth transitions for interactive elements */
-button {
-  transition: all 0.2s ease-in-out;
-}
-
-button:hover {
-  transform: translateY(-1px);
-}
-
-/* Custom scrollbar for better UX */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Enhanced focus states for accessibility */
-button:focus,
-input:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Responsive text sizing */
-@media (max-width: 640px) {
-  .text-4xl {
-    font-size: 2rem;
-  }
-
-  .text-2xl {
-    font-size: 1.5rem;
-  }
-}
-</style>

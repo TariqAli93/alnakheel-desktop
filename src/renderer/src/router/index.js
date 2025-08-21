@@ -53,6 +53,24 @@ const routes = [
     meta: { requiresAuth: true, title: 'المستخدمين' }
   },
   {
+    path: '/messages',
+    name: 'Messages',
+    component: () => import('../pages/webMessages.vue'),
+    meta: { requiresAuth: true, title: 'الرسائل' }
+  },
+  {
+    path: '/contracts',
+    name: 'Contracts',
+    component: () => import('../pages/Contract.vue'),
+    meta: { requiresAuth: true, title: 'العقود' }
+  },
+  {
+    path: '/print-contract',
+    name: 'PrintContract',
+    component: () => import('../components/PrintContract.vue'),
+    meta: { requiresAuth: true, title: 'طباعة العقد' }
+  },
+  {
     path: '/:pathMatch(.*)*',
     redirect: '/'
   }

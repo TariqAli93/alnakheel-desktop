@@ -110,3 +110,23 @@ body {
     @apply h-9 px-3;
   }
 }
+.bordered-table.v-theme--light {
+  --v-border-color: #15151533 !important;
+}
+
+.bordered-table.v-theme--dark {
+  --v-border-color: rgba(128, 128, 128, 0.4);
+}
+
+.bordered-table thead tr th,
+.bordered-table tbody tr td {
+  border-top: 1px solid var(--v-border-color) !important;
+  border-bottom: 1px solid var(--v-border-color) !important;
+  border-right: 1px solid var(--v-border-color) !important; /* الخط العامودي */
+  white-space: nowrap;
+}
+
+.bordered-table thead tr th:first-child,
+.bordered-table tbody tr td:first-child {
+  border-right: none !important;
+}
