@@ -35,17 +35,11 @@
             </template>
           </v-list-item>
         </v-list>
-        <v-divider class="my-3" />
+        <v-divider class="my-2" />
         <v-list nav density="comfortable">
-          <v-list-item title="العقود" to="/contracts">
+          <v-list-item title="عقود البيع" to="/contracts">
             <template #prepend>
               <Paperclip class="ml-3" />
-            </template>
-          </v-list-item>
-
-          <v-list-item title="الايجارات" to="/rentals">
-            <template #prepend>
-              <Receipt class="ml-3" />
             </template>
           </v-list-item>
         </v-list>
@@ -98,9 +92,8 @@ import { useRouter } from 'vue-router'
 import { jwtDecode } from 'jwt-decode'
 import { useLoginState } from '../stores/login'
 import $axios from '../plugins/vueAxios'
-import { checkRoles } from '../utils/checkRoles'
 import { emitter } from '../plugins/event-bus'
-import { Home, Building2, Users2, Plus, Bell, Menu, Paperclip, Receipt } from 'lucide-vue-next'
+import { Home, Building2, Users2, Plus, Bell, Menu, Paperclip } from 'lucide-vue-next'
 
 const theme = useTheme()
 
@@ -109,9 +102,6 @@ const router = useRouter()
 const loginStore = useLoginState()
 
 const navigationDrawer = ref(true)
-
-// Check if the user has the required roles from roles array
-const hasRole = checkRoles(loginStore.user, 'ADMIN')
 
 const token = ref(localStorage.getItem('authToken') || '')
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
