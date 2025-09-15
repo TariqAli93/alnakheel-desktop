@@ -15,12 +15,14 @@
         <v-row dense>
           <!-- اسم العقار -->
           <v-col cols="12" md="4">
-            <v-text-field
+            <v-combobox
               v-model="form.name"
               variant="outlined"
               label="اسم العقار"
               required
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.name)"
+              clearable
             />
           </v-col>
 
@@ -90,10 +92,11 @@
         <v-row>
           <template v-for="field in dynamicFields" :key="field.model">
             <v-col v-if="!field.if || field.if(form)" :cols="12" :md="field.md(form) || 6">
-              <v-text-field
+              <v-combobox
                 v-model="form[field.model]"
                 :variant="field.variant || 'outlined'"
                 :label="field.label"
+                :items="hiddenProperties.map((p) => p[field.model]).filter((v) => v)"
               />
             </v-col>
           </template>
@@ -123,19 +126,23 @@
         <v-row>
           <!-- صاحب العقار ورقم الهاتف -->
           <v-col cols="12" md="6">
-            <v-text-field
+            <v-combobox
               v-model="form.owner"
               variant="outlined"
               label="صاحب العقار"
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.owner).filter((v) => v)"
+              clearable
             />
           </v-col>
           <v-col cols="12" md="6">
-            <v-text-field
+            <v-combobox
               v-model="form.phone"
               variant="outlined"
               label="رقم الهاتف"
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.phone).filter((v) => v)"
+              clearable
             />
           </v-col>
         </v-row>
@@ -143,30 +150,36 @@
         <v-row>
           <!-- مساحة الأرض، العرض، العمق -->
           <v-col cols="12" md="4">
-            <v-text-field
+            <v-combobox
               v-model="form.area"
               variant="outlined"
               label="مساحة الأرض (م²)"
               type="number"
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.area).filter((v) => v)"
+              clearable
             />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field
+            <v-combobox
               v-model="form.width"
               variant="outlined"
               label="عرض الأرض (م)"
               type="number"
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.width).filter((v) => v)"
+              clearable
             />
           </v-col>
           <v-col cols="12" md="4">
-            <v-text-field
+            <v-combobox
               v-model="form.depth"
               variant="outlined"
               label="عمق الأرض (النزال)"
               type="number"
               :rules="[rules.required]"
+              :items="hiddenProperties.map((p) => p.depth).filter((v) => v)"
+              clearable
             />
           </v-col>
         </v-row>
@@ -247,7 +260,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import iraqAreas from '../plugins/iraqAreas'
 import { useToast } from 'vue-toastification'
 import taboType from '../plugins/taboType'
@@ -403,4 +416,12 @@ const submitForm = async () => {
     console.error(error)
   }
 }
+
+const hiddenProperties = ref([])
+
+onMounted(async () => {
+  hiddenProperties.value = await propertyService.getAll().then((res) => res.data.data || [])
+
+  console.log('Hidden properties:', hiddenProperties.value)
+})
 </script>
