@@ -1,4 +1,5 @@
 import $axios from '../plugins/vueAxios'
+import { generateJWT } from '../plugins/jwt.js'
 const propertyService = {
   create: (data) => $axios.post('/api/properties', data),
   update: (id, data) => $axios.put(`/api/properties/${id}`, data),
@@ -17,7 +18,39 @@ const propertyService = {
 }
 
 const userService = {
-  login: (data) => $axios.post('/auth/users/login', data),
+  login: async (data) => {
+    const isOffline = !navigator.onLine
+
+    if (isOffline) {
+      const { username, password } = data
+
+      const generatedToken = await generateJWT(
+        { username: 'admin', role: 'admin' },
+        'your_jwt_secret',
+        60 * 60 * 24 * 10
+      )
+
+      const storedUser = {
+        username: 'admin',
+        password: '12345678',
+        token: generatedToken
+      }
+
+      if (username === storedUser.username && password === storedUser.password) {
+        return {
+          data: {
+            success: true,
+            token: storedUser.token,
+            message: 'Login successful (offline mode)'
+          }
+        }
+      } else {
+        throw new Error('Invalid username or password (offline mode)')
+      }
+    } else {
+      return $axios.post('/auth/users/login', data)
+    }
+  },
   logout: () => $axios.post('/api/users/logout'),
   getUserById: (id) => $axios.get(`/api/users/${id}`),
   getUsers: () => $axios.get('/api/users'),

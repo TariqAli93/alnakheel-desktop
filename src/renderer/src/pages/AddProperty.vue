@@ -264,6 +264,7 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import iraqAreas from '../plugins/iraqAreas'
 import { useToast } from 'vue-toastification'
 import taboType from '../plugins/taboType'
+import { offlineSync } from '../plugins/offlineSync'
 import { propertyService } from '../services/api'
 
 const formRef = ref(null)
@@ -300,10 +301,10 @@ const propertyStatus = [
 
 const form = reactive({
   name: '',
-  type: '',
-  kind: '',
-  province: '',
-  district: '',
+  type: 'قطعة ارض',
+  kind: 'طابو زراعي',
+  province: 'بغداد',
+  district: 'الدورة',
   street: '',
   block: '',
   alley: '',
@@ -321,7 +322,7 @@ const form = reactive({
   shops: null,
   description: '',
   landNumber: '',
-  neighborhood: '',
+  neighborhood: 'دجلة',
   status: 'available' // Default status
 })
 
@@ -404,13 +405,16 @@ const submitForm = async () => {
   }
 
   try {
-    const res = await propertyService.create(modefiedForm)
+    // const res = await propertyService.create(modefiedForm)
 
-    if (res.data.success) {
-      toast.success('تم اضافة العقار بنجاح')
-    } else {
-      toast.error('حدث خطأ أثناء إضافة العقار')
-    }
+    // if (res.data.success) {
+    //   toast.success('تم اضافة العقار بنجاح')
+    // } else {
+    //   toast.error('حدث خطأ أثناء إضافة العقار')
+    // }
+
+    await offlineSync.save('properties', modefiedForm, propertyService.create)
+    toast.success('تم حفظ العقار (إما أونلاين أو أوفلاين)')
   } catch (error) {
     toast.error('حدث خطأ أثناء إضافة العقار')
     console.error(error)

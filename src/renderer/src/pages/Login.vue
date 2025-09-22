@@ -64,8 +64,6 @@ const login = async () => {
         password: password.value
       })
 
-      console.log(response.data)
-
       if (response.data.success) {
         const userData = loginStore.decodeToken(response.data.token)
 
@@ -79,12 +77,9 @@ const login = async () => {
         toast.error(response.data.message)
       }
     } catch (error) {
-      console.error('Login failed:', error.response.data.message)
-      toast.error(error.response.data.message)
+      toast.error('فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك.')
 
-      if (error.response.data.message === 'User is deleted') {
-        toast.error('المستخدم غير موجود')
-      }
+      console.error('Login error:', error)
 
       return
     }

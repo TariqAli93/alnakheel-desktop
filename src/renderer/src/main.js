@@ -7,5 +7,18 @@ import { createPinia } from 'pinia'
 import 'vue-toastification/dist/index.css'
 import './main.scss'
 import './app.css'
+const app = createApp(App).use(vuetify).use(createPinia()).use(router).use(Toast)
 
-createApp(App).use(vuetify).use(createPinia()).use(router).use(Toast).mount('#app')
+app.config.globalProperties.$isOffline = !navigator.onLine
+
+window.addEventListener('online', () => {
+  app.config.globalProperties.$isOffline = false
+  console.log('Went online')
+})
+
+window.addEventListener('offline', () => {
+  app.config.globalProperties.$isOffline = true
+  console.log('Went offline')
+})
+
+app.mount('#app')

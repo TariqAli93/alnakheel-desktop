@@ -140,9 +140,9 @@ onMounted(() => {
   emitter.on('messageRead', countTheMessages)
 
   if (savedTheme) {
-    theme.global.name.value = savedTheme
+    theme.change(savedTheme)
   } else {
-    theme.global.name.value = 'light' // Default theme
+    theme.change('light') // Default theme
   }
 })
 </script>

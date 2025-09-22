@@ -1,13 +1,14 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, globalShortcut } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron'
 import icon from '../../resources/icon.png?asset'
 import fs from 'node:fs/promises'
 
-function createWindow() {
+let mainWindow
+async function createWindow() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -43,20 +44,6 @@ function createWindow() {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
-
-  // Enable auto updater
-  if (is.dev) {
-    console.log('Auto updater is disabled in development mode.')
-  } else {
-    autoUpdater.checkForUpdatesAndNotify()
-    autoUpdater.on('update-available', () => {
-      alert('Update available. Downloading...')
-    })
-    autoUpdater.on('update-downloaded', () => {
-      alert('Update downloaded. Restarting app...')
-      autoUpdater.quitAndInstall()
-    })
-  }
 }
 
 // This method will be called when Electron has finished
@@ -77,6 +64,15 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+
+  globalShortcut.register('CommandOrControl+Shift+V', () => {
+    if (!mainWindow) return
+    if (mainWindow.webContents.isDevToolsOpened()) {
+      mainWindow.webContents.closeDevTools()
+    } else {
+      mainWindow.webContents.openDevTools({ mode: 'detach' })
+    }
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
@@ -104,6 +100,10 @@ ipcMain.handle('save-excel', async (_event, { defaultName, buffer }) => {
   if (canceled || !filePath) return null
   await fs.writeFile(filePath, Buffer.from(buffer))
   return filePath
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 // In this file you can include the rest of your app's specific main process
