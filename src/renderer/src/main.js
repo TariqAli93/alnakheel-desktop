@@ -7,18 +7,16 @@ import { createPinia } from 'pinia'
 import 'vue-toastification/dist/index.css'
 import './main.scss'
 import './app.css'
+import { offlineSync } from './plugins/offlineSync'
+
 const app = createApp(App).use(vuetify).use(createPinia()).use(router).use(Toast)
 
-app.config.globalProperties.$isOffline = !navigator.onLine
-
-window.addEventListener('online', () => {
-  app.config.globalProperties.$isOffline = false
-  console.log('Went online')
-})
-
-window.addEventListener('offline', () => {
-  app.config.globalProperties.$isOffline = true
-  console.log('Went offline')
-})
+offlineSync.init()
+setTimeout(() => {
+  console.log('تشغيل sync بعد 1 ثانية...')
+  offlineSync.sync()
+}, 1000)
 
 app.mount('#app')
+
+// جرّب المزامنة مرّة بعد ما يركب التطبيق

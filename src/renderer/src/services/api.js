@@ -1,6 +1,8 @@
 import $axios from '../plugins/vueAxios'
 import { generateJWT } from '../plugins/jwt.js'
+
 const propertyService = {
+  // بدون fallback، كل منطق الـ offline يدار من offlineSync
   create: (data) => $axios.post('/api/properties', data),
   update: (id, data) => $axios.put(`/api/properties/${id}`, data),
   delete: (id) => $axios.delete(`/api/properties/${id}`),
@@ -23,7 +25,6 @@ const userService = {
 
     if (isOffline) {
       const { username, password } = data
-
       const generatedToken = await generateJWT(
         { username: 'admin', role: 'admin' },
         'your_jwt_secret',
@@ -61,7 +62,6 @@ const userService = {
   restoreUser: (id) => $axios.put(`/api/user/restore/${id}`),
   activeUser: (id) => $axios.put(`/api/users/active/${id}`),
   disactiveUser: (id) => $axios.put(`/api/users/disactive/${id}`)
-  // Add more user-related methods as needed
 }
 
 export { propertyService, userService }

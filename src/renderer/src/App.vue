@@ -12,11 +12,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
 import { useLoginState } from './stores/login'
 import DefaultLayout from './layouts/DefaultLayout.vue'
 import LoginLayout from './layouts/LoginLayout.vue'
 import { isLoading } from './plugins/vueAxios'
+import { offlineSync } from './plugins/offlineSync'
+import { useToast } from 'vue-toastification'
+import { useRoute } from 'vue-router'
+
+const toast = useToast()
+
+const route = useRoute()
 
 const loginStore = useLoginState()
 const isLoggedIn = computed(() => loginStore.isLoggedIn ?? false)
@@ -24,6 +31,40 @@ const isLoggedIn = computed(() => loginStore.isLoggedIn ?? false)
 if (!loginStore.checkTokenValidity()) {
   loginStore.logout()
 }
+
+const isOnline = ref(navigator.onLine)
+
+const updateStatus = () => {
+  isOnline.value = navigator.onLine
+}
+
+watch(isOnline, (newStatus) => {
+  if (newStatus) {
+    toast.info('الاتصال بالإنترنت متاح، محاولة المزامنة...')
+    offlineSync.sync()
+  }
+})
+
+watch(route.fullPath, () => {
+  offlineSync.sync()
+})
+
+onMounted(() => {
+  window.addEventListener('online', updateStatus)
+  window.addEventListener('offline', updateStatus)
+
+  // جرّب المزامنة مرّة بعد ما يركب التطبيق
+  setTimeout(() => {
+    console.log('تشغيل sync بعد 1 ثانية...')
+    toast.info('محاولة المزامنة مع الخادم...')
+    offlineSync.sync()
+  }, 1000)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('online', updateStatus)
+  window.removeEventListener('offline', updateStatus)
+})
 </script>
 
 <style>

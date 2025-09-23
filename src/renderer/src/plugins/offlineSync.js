@@ -1,57 +1,98 @@
-// plugins/offlineSync.js
 import Dexie from 'dexie'
+import { propertyService } from '../services/api'
 
-// إنشاء قاعدة بيانات باسم offlineDB
 const db = new Dexie('offlineDB')
-db.version(1).stores({
-  pending: '++id, collection, timestamp'
-})
+db.version(1).stores({ pending: '++id,collection,timestamp' })
 
-/**
- * حفظ عملية بالـ queue إذا النت مقطوع
- * @param {string} collection - اسم التجميع (مثلاً: "properties")
- * @param {object} data - البيانات اللي تريد تخزنها
- * @param {function} apiCall - دالة ترجع Promise لإرسال البيانات للسيرفر
- */
+const handlers = {
+  properties: async (data) => {
+    return propertyService.create(data) // call network-only
+  }
+}
+
 async function save(collection, data, apiCall) {
-  if (navigator.onLine) {
-    // إذا النت موجود نجرب نرسل مباشرة
+  if (typeof apiCall === 'function') {
     try {
-      return await apiCall(data)
-    } catch (err) {
-      // إذا صار خطأ نرجع نخزن بالـ queue
-      await db.pending.add({ collection, data, timestamp: Date.now() })
-      console.error('فشل الإرسال، تم تخزين العملية محلياً', err)
-    }
-  } else {
-    // إذا النت مقطوع نخزن مباشرة
-    await db.pending.add({ collection, data, timestamp: Date.now() })
-    console.log('الانترنت مقطوع، العملية مخزنة محلياً')
-  }
-}
-
-/**
- * مزامنة جميع العمليات المعلقة
- */
-async function sync() {
-  const pending = await db.pending.toArray()
-  for (const item of pending) {
-    try {
-      // لازم تعرف شلون ترسل بناءً على collection
-      if (item.collection === 'properties') {
-        const { propertyService } = await import('../services/api')
-        await propertyService.create(item.data)
+      const res = await apiCall(data)
+      if (res && res.status >= 200 && res.status < 300) {
+        return {
+          success: true,
+          offline: false,
+          data: res.data,
+          message: 'تمت العملية اونلاين'
+        }
       }
-      await db.pending.delete(item.id)
-      console.log('تمت مزامنة العملية:', item)
+      return {
+        success: false,
+        offline: false,
+        data,
+        message: `خطأ من السيرفر: ${res?.status}`
+      }
     } catch (err) {
-      console.error('فشل المزامنة، راح نجرب مرة ثانية لاحقاً', err)
-      return
+      // إذا error بدون response → انقطاع شبكة
+      if (!err.response) {
+        console.warn('انقطاع الشبكة، نخزن محلياً')
+        await db.pending.add({ collection, data, timestamp: Date.now() })
+        return {
+          success: true,
+          offline: true,
+          data,
+          message: 'تم حفظ العملية محلياً (offline)، وسيتم رفعها عند عودة الانترنت'
+        }
+      }
+      // error بس من السيرفر (status 400/500)
+      return {
+        success: false,
+        offline: false,
+        data: err.response?.data || data,
+        message: `خطأ من السيرفر: ${err.response?.status}`
+      }
     }
+  }
+
+  // fallback إذا apiCall مفقود
+  await db.pending.add({ collection, data, timestamp: Date.now() })
+  return {
+    success: true,
+    offline: true,
+    data,
+    message: 'تم التخزين محلياً (بدون apiCall)'
   }
 }
 
-// Listen على رجوع الانترنت
-window.addEventListener('online', sync)
+let syncing = false
+async function sync() {
+  if (!navigator.onLine || syncing) return
+  syncing = true
+  console.log('تشغيل sync()', db.pending.length, 'pending items')
+  try {
+    const pending = await db.pending.orderBy('timestamp').toArray()
+    for (const item of pending) {
+      try {
+        const handler = handlers[item.collection]
+        if (!handler) throw new Error(`No handler for collection "${item.collection}"`)
+        const res = await handler(item.data)
+        if (res && res.status >= 200 && res.status < 300) {
+          await db.pending.delete(item.id)
+          console.log('تمت مزامنة العملية:', item)
+        } else {
+          console.error('فشل المزامنة، السيرفر رجع خطأ', res)
+        }
+      } catch (err) {
+        console.error('فشل المزامنة لعنصر واحد، سيعاد لاحقاً:', err, item)
+      }
+    }
+  } finally {
+    syncing = false
+  }
+}
 
-export const offlineSync = { save, sync }
+async function init() {
+  await sync() // run once at startup
+  window.addEventListener('online', sync)
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') await sync()
+  })
+}
+
+export const offlineSync = { save, sync, init }

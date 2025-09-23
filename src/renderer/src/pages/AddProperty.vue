@@ -393,34 +393,21 @@ const rules = {
 
 const submitForm = async () => {
   const { valid } = await formRef.value.validate()
-
-  const modefiedForm = { ...form, elevator: form.elevator ? 1 : 0 }
-
-  console.log('Submitting form:', modefiedForm)
-
   if (!valid) {
     toast.error('يرجى ادخال جميع البيانات المطلوبة')
-
     return
   }
 
-  try {
-    // const res = await propertyService.create(modefiedForm)
+  const modefiedForm = { ...form, elevator: form.elevator ? 1 : 0 }
 
-    // if (res.data.success) {
-    //   toast.success('تم اضافة العقار بنجاح')
-    // } else {
-    //   toast.error('حدث خطأ أثناء إضافة العقار')
-    // }
+  const res = await offlineSync.save('properties', modefiedForm, propertyService.create)
 
-    await offlineSync.save('properties', modefiedForm, propertyService.create)
-    toast.success('تم حفظ العقار (إما أونلاين أو أوفلاين)')
-  } catch (error) {
-    toast.error('حدث خطأ أثناء إضافة العقار')
-    console.error(error)
+  if (res.success) {
+    res.offline ? toast.info(res.message) : toast.success(res.message)
+  } else {
+    toast.error(res.message || 'فشل إضافة العقار')
   }
 }
-
 const hiddenProperties = ref([])
 
 onMounted(async () => {

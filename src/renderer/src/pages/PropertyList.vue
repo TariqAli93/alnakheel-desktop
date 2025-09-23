@@ -10,15 +10,38 @@
     </v-card-subtitle>
 
     <v-divider class="my-4" />
-    <v-text-field
-      v-model="search"
-      variant="solo-filled"
-      label="ابحث عن اسم، نوع أو محافظة"
-      prepend-inner-icon="mdi-magnify"
-      hide-details
-      class="mt-3"
-      clearable
-    />
+    <v-row>
+      <v-col cols="12" lg="12">
+        <v-text-field
+          v-model="search"
+          variant="solo-filled"
+          label="ابحث عن اسم، نوع أو محافظة"
+          prepend-inner-icon="mdi-magnify"
+          hide-details
+          class="mt-3"
+          clearable
+        />
+      </v-col>
+
+      <!-- add filter by price -->
+      <!-- <v-col cols="12" lg="6">
+        <v-slider
+          v-model="priceRange"
+          class="mt-3"
+          label="نطاق السعر"
+          ticks
+          min="0"
+          max="2000"
+          step="100"
+          thumb-label="always"
+          range
+          prepend-icon="mdi-currency-usd"
+          track-color="blue lighten-3"
+          color="blue"
+          @change="onPriceRangeChange"
+        />
+      </v-col> -->
+    </v-row>
 
     <v-row class="mt-3">
       <v-col cols="12" lg="6">
@@ -196,6 +219,7 @@ import { Download } from 'lucide-vue-next'
 const toast = useToast()
 
 const loginState = useLoginState()
+const priceRange = ref([0, 1000000])
 
 const properties = ref([])
 const search = ref('')
@@ -242,9 +266,9 @@ const headers = [
 const get_proprties = async () => {
   try {
     const res = await propertyService.getAll()
-    console.log(res)
-    properties.value = res.data.data // Assuming res is an array of properties
-    console.log(res)
+    // sort last added first
+    const sorted = res.data.data.sort((a, b) => b.id - a.id)
+    properties.value = sorted // Assuming res is an array of properties
   } catch (error) {
     console.log(error)
     toast.error('خطأ في جلب البيانات', 'تعذر جلب البيانات من الخادم')
