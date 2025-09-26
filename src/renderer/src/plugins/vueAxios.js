@@ -6,10 +6,7 @@ import { useLoginState } from '../stores/login'
 export const isLoading = ref(false)
 
 const $axios = axios.create({
-  baseURL:
-    process.env.NODE_ENV === 'production'
-      ? 'https://alnakhel.online:3003/'
-      : 'http://localhost:3003/',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 10000
 })
 

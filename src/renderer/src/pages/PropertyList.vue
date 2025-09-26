@@ -11,42 +11,34 @@
 
     <v-divider class="my-4" />
     <v-row>
-      <v-col cols="12" lg="12">
+      <v-col cols="12" lg="3">
         <v-text-field
           v-model="search"
           variant="solo-filled"
           label="ابحث عن اسم، نوع أو محافظة"
-          prepend-inner-icon="mdi-magnify"
+          prepend-inner-icon="mdi-filter"
           hide-details
-          class="mt-3"
           clearable
         />
       </v-col>
 
-      <!-- add filter by price -->
-      <!-- <v-col cols="12" lg="6">
-        <v-slider
-          v-model="priceRange"
-          class="mt-3"
-          label="نطاق السعر"
-          ticks
-          min="0"
-          max="2000"
-          step="100"
-          thumb-label="always"
-          range
-          prepend-icon="mdi-currency-usd"
-          track-color="blue lighten-3"
-          color="blue"
-          @change="onPriceRangeChange"
-        />
-      </v-col> -->
-    </v-row>
-
-    <v-row class="mt-3">
-      <v-col cols="12" lg="6">
+      <v-col cols="12" lg="3">
         <v-select
-          v-model="selectedTaboType"
+          v-model="filters.status"
+          :items="propertyStatus"
+          item-title="title"
+          item-value="value"
+          label="حالة العقار"
+          prepend-inner-icon="mdi-filter"
+          variant="solo-filled"
+          hide-details
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-select
+          v-model="filters.taboType"
           :items="tabo"
           label="جنس العقار"
           variant="solo-filled"
@@ -54,15 +46,118 @@
           class="mb-2"
           prepend-inner-icon="mdi-filter"
           clearable
-          @update:model-value="onChangeTaboType"
         />
       </v-col>
 
-      <v-col cols="12" lg="6">
+      <v-col cols="12" lg="3">
         <v-select
-          v-model="selectedProprtiesType"
+          v-model="filters.proprtiesType"
           :items="proprtiesType"
           label="نوع العقار"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-combobox
+          v-model="filters.province"
+          :items="Array.from(new Set(properties.map((p) => p.province))).filter(Boolean)"
+          label="المحافظة"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-combobox
+          v-model="filters.district"
+          :items="Array.from(new Set(properties.map((p) => p.district))).filter(Boolean)"
+          label="المنطقة"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-combobox
+          v-model="filters.neighborhood"
+          :items="Array.from(new Set(properties.map((p) => p.neighborhood))).filter(Boolean)"
+          label="الحي"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-combobox
+          v-model="filters.street"
+          :items="Array.from(new Set(properties.map((p) => p.street))).filter(Boolean)"
+          label="الشارع"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-text-field
+          v-model.number="filters.priceFrom"
+          type="number"
+          label="السعر من"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-text-field
+          v-model.number="filters.priceTo"
+          type="number"
+          label="السعر إلى"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-text-field
+          v-model.number="filters.areaFrom"
+          type="number"
+          label="المساحة من (م²)"
+          variant="solo-filled"
+          hide-details
+          class="mb-2"
+          prepend-inner-icon="mdi-filter"
+          clearable
+        />
+      </v-col>
+
+      <v-col cols="12" lg="3">
+        <v-text-field
+          v-model.number="filters.areaTo"
+          type="number"
+          label="المساحة إلى (م²)"
           variant="solo-filled"
           hide-details
           class="mb-2"
@@ -132,19 +227,19 @@
 
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.alley="{ item }">
-        <span>{{ item.alley === null || item.alley === '' ? 'غير محدد' : item.alley }}</span>
+        <span>{{ item.alley || 'غير محدد' }}</span>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.block="{ item }">
-        <span>{{ item.block === null || item.block === '' ? 'غير محدد' : item.block }}</span>
+        <span>{{ item.block || 'غير محدد' }}</span>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.floors="{ item }">
-        <span>{{ item.floors === null || item.floors === '' ? 'غير محدد' : item.floors }}</span>
+        <span>{{ item.floors || 'غير محدد' }}</span>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.shops="{ item }">
-        <span>{{ item.shops === null || item.shops === '' ? 'غير محدد' : item.shops }}</span>
+        <span>{{ item.shops || 'غير محدد' }}</span>
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.elevator="{ item }">
@@ -154,55 +249,31 @@
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.status="{ item }">
-        <v-chip
-          :color="
-            item.status === 'available'
-              ? 'green'
-              : item.status === 'sold'
-                ? 'red'
-                : item.status === 'reserved'
-                  ? 'yellow'
-                  : item.status === 'underConstruction'
-                    ? 'orange'
-                    : 'grey'
-          "
-          class="ma-1"
-        >
-          {{ propertyStatus[item.status] }}
+        <v-chip :color="statusColors[item.status] || 'grey'" class="ma-1" dark>
+          {{ propertyStatus.find((status) => status.value === item.status)?.title || 'غير محدد' }}
         </v-chip>
       </template>
 
       <!-- description -->
-
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.description="{ item }">
-        <!-- sub string  -->
-        <span
-          v-if="item.description && item.description.length > 25"
-          style="min-width: 200px !important; display: block"
-        >
-          {{ item.description.substring(0, 25) }}...
-        </span>
-        <span
-          v-else-if="item.description && item.description.length <= 25"
-          style="min-width: 200px !important; display: block"
-        >
-          {{ item.description }}
+        <span class="cell-text">
+          {{
+            item.description && item.description.length > 25
+              ? item.description.substring(0, 25) + '...'
+              : item.description || ''
+          }}
         </span>
       </template>
 
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.name="{ item }">
-        <span style="min-width: 200px !important; display: block">
-          {{ item.name }}
-        </span>
+        <span class="cell-text">{{ item.name }}</span>
       </template>
 
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template #item.phone="{ item }">
-        <span style="min-width: 200px !important; display: block">
-          {{ item.phone }}
-        </span>
+        <span class="cell-text">{{ item.phone }}</span>
       </template>
     </v-data-table>
   </v-card>
@@ -217,24 +288,41 @@ import { useLoginState } from '../stores/login'
 import { Download } from 'lucide-vue-next'
 
 const toast = useToast()
-
 const loginState = useLoginState()
-const priceRange = ref([0, 1000000])
 
 const properties = ref([])
 const search = ref('')
 const tabo = Object.keys(taboType).map((key) => key)
-const proprtiesType = computed(() => {
-  return taboType[selectedTaboType.value] || []
-})
 
-const propertyStatus = reactive({
-  available: 'متاح',
-  sold: 'مباع',
-  reserved: 'محجوز',
-  underConstruction: 'تحت الإنشاء',
-  notAvailable: 'غير متاح'
-})
+const propertyStatus = [
+  {
+    value: 'available',
+    title: 'متاح'
+  },
+  {
+    value: 'sold',
+    title: 'مباع'
+  },
+  {
+    value: 'reserved',
+    title: 'محجوز'
+  },
+  {
+    value: 'underConstruction',
+    title: 'تحت الإنشاء'
+  },
+  {
+    value: 'notAvailable',
+    title: 'غير متاح'
+  }
+]
+
+const statusColors = {
+  available: 'green',
+  sold: 'red',
+  reserved: 'yellow',
+  underConstruction: 'orange'
+}
 
 const headers = [
   { title: 'الرقم', value: 'id', align: 'start', width: '200px' },
@@ -266,9 +354,8 @@ const headers = [
 const get_proprties = async () => {
   try {
     const res = await propertyService.getAll()
-    // sort last added first
     const sorted = res.data.data.sort((a, b) => b.id - a.id)
-    properties.value = sorted // Assuming res is an array of properties
+    properties.value = sorted
   } catch (error) {
     console.log(error)
     toast.error('خطأ في جلب البيانات', 'تعذر جلب البيانات من الخادم')
@@ -279,8 +366,7 @@ const delete_property = async (id) => {
   if (confirm('هل أنت متأكد من حذف هذا العقار؟')) {
     try {
       await propertyService.delete(id)
-
-      get_proprties() // Refresh the properties list
+      get_proprties()
       toast.success('تم حذف العقار بنجاح', 'تم حذف العقار بنجاح من القائمة')
     } catch (error) {
       console.log(error)
@@ -291,20 +377,47 @@ const delete_property = async (id) => {
   }
 }
 
+const filters = reactive({
+  taboType: null,
+  proprtiesType: null,
+  priceFrom: null,
+  priceTo: null,
+  status: null,
+  province: null,
+  district: null,
+  neighborhood: null,
+  street: null,
+  areaFrom: null,
+  areaTo: null
+})
+
+const proprtiesType = computed(() => {
+  return taboType[filters.taboType] || []
+})
+
 const filteredProperties = computed(() => {
   return properties.value.filter((property) => {
-    const matchesTaboType = !selectedTaboType.value || property.kind === selectedTaboType.value
-    const matchesProprtiesType =
-      !selectedProprtiesType.value || property.type === selectedProprtiesType.value
-    return matchesTaboType && matchesProprtiesType
+    return (
+      (!filters.taboType || property.kind === filters.taboType) &&
+      (!filters.proprtiesType || property.type === filters.proprtiesType) &&
+      (!filters.status || property.status === filters.status) &&
+      (!filters.province || property.province?.includes(filters.province)) &&
+      (!filters.district || property.district?.includes(filters.district)) &&
+      (!filters.neighborhood || property.neighborhood?.includes(filters.neighborhood)) &&
+      (!filters.street || property.street?.includes(filters.street)) &&
+      (!filters.priceFrom || property.price >= filters.priceFrom) &&
+      (!filters.priceTo || property.price <= filters.priceTo) &&
+      (!filters.areaFrom || property.area >= filters.areaFrom) &&
+      (!filters.areaTo || property.area <= filters.areaTo)
+    )
   })
 })
 
 const exportProperties = async () => {
   try {
     const res = await propertyService.exportPropertiesToExcel(filteredProperties.value)
-    const buffer = res.data // ✅ هذا Buffer/ArrayBuffer
-    const defaultName = `properties-${new Date().toISOString().slice(0, 10)}.xlsx`
+    const buffer = res.data
+    const defaultName = `properties-${filters.taboType || 'all'}-${new Date().toISOString().slice(0, 10)}.xlsx`
     await window.api.saveExcel({ defaultName, buffer })
     toast.success('تم تصدير العقارات بنجاح', 'تم تصدير العقارات إلى Excel')
   } catch (error) {
@@ -313,17 +426,14 @@ const exportProperties = async () => {
   }
 }
 
-// model variables
-let selectedTaboType = ref(null)
-let selectedProprtiesType = ref(null)
-
-let onChangeTaboType = (t) => {
-  proprtiesType.value = taboType[t] || []
-}
-
 onMounted(() => {
   get_proprties()
 })
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.cell-text {
+  min-width: 200px !important;
+  display: block;
+}
+</style>

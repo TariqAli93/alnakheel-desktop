@@ -102,6 +102,20 @@ ipcMain.handle('save-excel', async (_event, { defaultName, buffer }) => {
   return filePath
 })
 
+// if app is open disable multiple instances
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    // بس نعرض تنبيه للمستخدم
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'تنبيه',
+      message: 'البرنامج يعمل بالفعل.\nلا يمكنك فتح أكثر من نسخة.'
+    })
+  })
+}
+
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
 })
